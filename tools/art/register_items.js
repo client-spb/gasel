@@ -1,0 +1,40 @@
+'use strict';
+const ITEM_S = 160;
+['watermelon', 'eggs', 'egg', 'fridge', 'honey', 'box', 'carpet', 'sack', 'potato', 'accordion', 'firtree', 'fish', 'samovar', 'pickles', 'tv',
+ 'canister', 'coin', 'wrench', 'cheburek', 'magnet'].forEach(n => asset('it_' + n, ITEM_S, ITEM_S, (ctx, w, h) => IT[n](ctx, w, 0), { meta: { s: ITEM_S } }));
+['cat', 'goose'].forEach(n => [0, 1].forEach(f => asset('it_' + n + f, ITEM_S, ITEM_S, (ctx, w) => IT[n](ctx, w, f), { meta: { s: ITEM_S } })));
+// персонажи: ppm 100, якорь — центр низа
+const CP = 100;
+const cr = (name, wm, hm, fn, frames) => (frames || [0]).forEach(f => asset(name + (frames ? f : ''), Math.round(wm * CP), Math.round(hm * CP), (ctx, w, h) => fn(ctx, w, h, CP, f), { meta: { ppm: CP, ax: Math.round(wm * CP) / 2, ay: Math.round(hm * CP) - 6 } }));
+cr('cow', 3.1, 1.85, CR.cow, [0, 1, 2, 3]);
+cr('gai', 1.5, 2.0, CR.gai, [0, 1]);
+cr('dpscar', 4.3, 1.7, CR.dpscar);
+cr('booth', 2.7, 2.45, CR.booth);
+cr('moose', 3.4, 2.7, CR.moose, [0, 1, 2]);
+cr('bear', 1.8, 2.25, CR.bear, [0, 1]);
+cr('dog', 1.4, 0.85, CR.dog, [0, 1]);
+cr('babushka', 1.3, 1.65, CR.babushka, [0, 1]);
+// реквизит
+const pr = (name, wm, hm, fn, arg) => asset(name, Math.round(wm * CP), Math.round(hm * CP), (ctx, w, h) => fn(ctx, w, h, CP, arg), { meta: { ppm: CP, ax: Math.round(wm * CP) / 2, ay: Math.round(hm * CP) - 6 } });
+pr('sign_speed', 1.0, 2.7, PR.sign_speed, 60);
+pr('sign_bumps', 1.1, 2.7, PR.sign_bumps);
+pr('sign_animals', 1.1, 2.7, PR.sign_animals);
+pr('sign_cow', 1.1, 2.7, PR.sign_cow);
+pr('sign_works', 1.1, 2.7, PR.sign_works);
+pr('sign_gas', 0.9, 2.7, PR.sign_gas);
+pr('kmpost', 0.4, 1.1, PR.kmpost);
+pr('city_sign', 2.8, 2.5, PR.city_sign);
+pr('warehouse', 11, 6.3, PR.warehouse);
+pr('azs', 10.2, 4.8, PR.azs);
+pr('cafe', 7, 4.1, PR.cafe);
+pr('busstop', 3.4, 2.8, PR.busstop);
+ADS.forEach(a => pr(a.name, 4.9, 5.2, PR.billboard, a));
+pr('cone', 0.6, 0.85, PR.cone);
+pr('logs', 2.6, 0.95, PR.logs);
+pr('rock', 1.7, 0.85, PR.rock);
+pr('ramp_sign', 1.8, 1.25, PR.ramp_sign);
+pr('barrier', 4.0, 0.9, PR.barrier);
+pr('bridge_rail', 4.0, 1.2, PR.bridge_rail);
+pr('bridge_pillar', 1.8, 6.2, PR.bridge_pillar);
+pr('tower', 3.4, 9.3, PR.tower);
+['summer', 'autumn', 'dry', 'snow', 'ural'].forEach(k => asset('grass_' + k, 512, 96, (ctx, w, h) => PR.grass(ctx, w, h, 0, k), { meta: { n: 4 } }));
