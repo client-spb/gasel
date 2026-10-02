@@ -7,8 +7,18 @@ function frame(ts) {
   rafId = requestAnimationFrame(frame);
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016);
   lastTs = ts;
+  autoQuality(dt);
   if (running && !G.paused && SCREEN === 'game') { try { update(dt); } catch (e) { console.error(e); } }
   try { draw(); } catch (e) { console.error(e); }
+}
+// если кадры не успевают — уменьшаем разрешение холста
+const AQ = { acc: 0, n: 0, cool: 0 };
+function autoQuality(dt) {
+  if (document.hidden) return;
+  AQ.acc += dt; AQ.n++;
+  if (AQ.n < 90) return;
+  const avg = AQ.acc / AQ.n; AQ.acc = 0; AQ.n = 0;
+  if (avg > 0.022 && QUALITY > 0.67) { QUALITY = Math.max(0.67, QUALITY - 0.17); resizeCanvas(); }
 }
 function startLoop() { running = true; lastTs = performance.now(); }
 function stopLoop() { running = false; }

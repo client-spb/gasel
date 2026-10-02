@@ -5,13 +5,28 @@
 const cv = $('cv'), ctx = cv.getContext('2d');
 let DPR = 1;
 const IMG = {};
+const layerCache = {};
+// слой фона, заранее уменьшенный до нужной высоты — копируется без масштабирования
+function layerImg(name, h) {
+  const img = IMG[name]; if (!img) return null;
+  const ph = Math.max(1, Math.round(h * DPR)), key = name + '|' + ph;
+  let c = layerCache[key];
+  if (!c) {
+    for (const k in layerCache) if (k.startsWith(name + '|')) delete layerCache[k];
+    c = document.createElement('canvas'); c.height = ph; c.width = Math.max(1, Math.round(img.width * ph / img.height));
+    const g = c.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(img, 0, 0, c.width, c.height);
+    layerCache[key] = c;
+  }
+  return c;
+}
 const V = { x: 0, y: 0, ppm: 30, sx: 0, sy: 0 };
-let vignette = null, glowSpr = null;
+let glowSpr = null;
+let QUALITY = 1;   // снижается автоматически, если кадры не успевают
 function resizeCanvas() {
-  DPR = Math.min(2, window.devicePixelRatio || 1);
+  DPR = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1) * QUALITY);
+  for (const k in layerCache) delete layerCache[k];
   cv.style.width = APPW + 'px'; cv.style.height = APPH + 'px';
   cv.width = Math.round(APPW * DPR); cv.height = Math.round(APPH * DPR);
-  vignette = null;
 }
 const SX = x => (x - V.x) * V.ppm + APPW / 2 + V.sx;
 const SY = y => APPH / 2 - (y - V.y) * V.ppm + V.sy;
@@ -49,28 +64,23 @@ function makeGlow() {
   const gr = g.createRadialGradient(64, 64, 4, 64, 64, 64); gr.addColorStop(0, 'rgba(255,240,170,.9)'); gr.addColorStop(0.4, 'rgba(255,210,80,.35)'); gr.addColorStop(1, 'rgba(255,200,60,0)');
   g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return c;
 }
-function makeVignette() {
-  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(APPW / 2)); c.height = Math.max(1, Math.round(APPH / 2)); const g = c.getContext('2d');
-  const gr = g.createRadialGradient(c.width / 2, c.height * 0.45, Math.min(c.width, c.height) * 0.35, c.width / 2, c.height / 2, Math.max(c.width, c.height) * 0.75);
-  gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.42)'); g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height); return c;
-}
 
 // ---------------- фоновые слои ----------------
 function drawLayers(theme, alpha, camX, vy) {
   const t = THEMES[theme], W = APPW, H = APPH, ppm = V.ppm;
-  const far = IMG['bg_' + theme + '_far'], mid = IMG['bg_' + theme + '_mid'], near = IMG['bg_' + theme + '_near'];
+  
   ctx.save(); ctx.globalAlpha = alpha;
-  const fh = Math.max(H * 0.84, 240), fk = fh / 768, fw = 2048 * fk;
+  const fh = Math.max(H * 0.84, 240), far = layerImg('bg_' + theme + '_far', fh), fw = far ? far.width / DPR : 2048 * fh / 768;
   const fTop = H * 0.5 - 0.7 * fh + vy * 0.1;
   ctx.fillStyle = t.sky[0]; ctx.fillRect(0, 0, W, fTop + 2);
-  if (far) { let off = ((camX * ppm * 0.035) % fw + fw) % fw; for (let x = -off; x < W; x += fw) ctx.drawImage(far, x, fTop, fw + 1, fh); }
+  if (far) { let off = ((camX * ppm * 0.035) % fw + fw) % fw; for (let x = -off; x < W; x += fw) ctx.drawImage(far, Math.floor(x), Math.round(fTop), fw, fh); }
   else { const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, t.sky[0]); g.addColorStop(0.6, t.sky[1]); g.addColorStop(1, t.sky[2]); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
   ctx.fillStyle = t.ground; ctx.fillRect(0, fTop + fh - 1, W, H);
-  const mh = Math.max(H * 0.42, 130), mk = mh / 512, mw = 2048 * mk, mBot = H * 0.8 + vy * 0.25;
-  if (mid) { let off = ((camX * ppm * 0.14) % mw + mw) % mw; for (let x = -off; x < W; x += mw) ctx.drawImage(mid, x, mBot - mh, mw + 1, mh); }
+  const mh = Math.max(H * 0.42, 130), mid = layerImg('bg_' + theme + '_mid', mh), mw = mid ? mid.width / DPR : 1, mBot = H * 0.8 + vy * 0.25;
+  if (mid) { let off = ((camX * ppm * 0.14) % mw + mw) % mw; for (let x = -off; x < W; x += mw) ctx.drawImage(mid, Math.floor(x), Math.round(mBot - mh), mw, mh); }
   ctx.fillStyle = t.mid; ctx.fillRect(0, mBot - 2, W, H);
-  const nh = Math.max(H * 0.27, 90), nk = nh / 320, nw = 2048 * nk, nBot = H * 0.94 + vy * 0.45;
-  if (near) { let off = ((camX * ppm * 0.32) % nw + nw) % nw; for (let x = -off; x < W; x += nw) ctx.drawImage(near, x, nBot - nh, nw + 1, nh); }
+  const nh = Math.max(H * 0.27, 90), near = layerImg('bg_' + theme + '_near', nh), nw = near ? near.width / DPR : 1, nBot = H * 0.94 + vy * 0.45;
+  if (near) { let off = ((camX * ppm * 0.32) % nw + nw) % nw; for (let x = -off; x < W; x += nw) ctx.drawImage(near, Math.floor(x), Math.round(nBot - nh), nw, nh); }
   ctx.fillStyle = t.near; ctx.fillRect(0, nBot - 2, W, H);
   ctx.restore();
 }
@@ -103,9 +113,6 @@ function drawGround(T, theme) {
   ctx.lineTo(SX(TX0 + i1 * DX), APPH + 20); ctx.closePath();
   ctx.fillStyle = worldPattern(t.soil, 3.4) || t.ground; ctx.fill();
   ctx.save(); ctx.clip();
-  const sy0 = SY(V.y);
-  const g = ctx.createLinearGradient(0, sy0 - 2 * ppm, 0, APPH);
-  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(10,6,2,.45)'); ctx.fillStyle = g; ctx.fillRect(0, 0, APPW, APPH);
   // тень под дорогой
   ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = 1.4 * ppm; ctx.lineJoin = 'round';
   ctx.beginPath(); for (let i = i0; i <= i1; i++) { const x = SX(TX0 + i * DX), y = SY(T.h[i] - 0.75); i === i0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); } ctx.stroke();
@@ -424,8 +431,6 @@ function draw() {
   }
   drawWeather(t.weather, fdt, G.state === 'play' ? tr.speed : 0);
   if (t.light) { ctx.fillStyle = t.light; ctx.fillRect(0, 0, APPW, APPH); }
-  if (!vignette) vignette = makeVignette();
-  ctx.drawImage(vignette, 0, 0, APPW, APPH);
   if (G.boostT > 0) { ctx.strokeStyle = 'rgba(255,220,120,.25)'; ctx.lineWidth = 2; for (let i = 0; i < 10; i++) { const y = Math.random() * APPH, x = Math.random() * APPW; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 80 - Math.random() * 80, y); ctx.stroke(); } }
   if (G.flash > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (G.flash * 0.6) + ')'; ctx.fillRect(0, 0, APPW, APPH); }
   if (G.state === 'crash') { ctx.fillStyle = 'rgba(80,0,0,' + Math.min(0.3, G.crashT * 0.2) + ')'; ctx.fillRect(0, 0, APPW, APPH); }
@@ -498,8 +503,6 @@ function drawMenuScene(dt) {
   drawParticles(MS.parts);
   drawWeather(THEMES[MS.theme].weather, dt, 3);
   if (THEMES[MS.theme].light) { ctx.fillStyle = THEMES[MS.theme].light; ctx.fillRect(0, 0, APPW, APPH); }
-  if (!vignette) vignette = makeVignette();
-  ctx.drawImage(vignette, 0, 0, APPW, APPH);
   if (SCREEN === 'routes' || SCREEN === 'load') { ctx.fillStyle = 'rgba(14,16,20,.55)'; ctx.fillRect(0, 0, APPW, APPH); }
 }
 
@@ -546,8 +549,6 @@ function drawGarageScene(dt) {
   TRUCK.wheels.forEach(w => { const [wx, wy] = toS(w.x, TRUCK.wheelR); const s = TRUCK.wheelR * 2 * ppm * 256 / 250; const img = SAVE.cosOn.includes('chrome') ? IMG.wheel_chrome : IMG.wheel; if (img) { ctx.save(); ctx.translate(wx, wy); ctx.rotate(GS.t * 0.3); ctx.drawImage(img, -s / 2, -s / 2, s, s); ctx.restore(); } });
   const [bx, by] = toS(TRUCK.com[0], TRUCK.com[1] + Math.sin(GS.t * 2) * 0.004);
   drawTruckBody(bx, by, 0, { com: TRUCK.com, mood: 'cool', bob: 0, cos: SAVE.cosOn, t: GS.t, door: 0, night: false });
-  if (!vignette) vignette = makeVignette();
-  ctx.drawImage(vignette, 0, 0, W, H);
 }
 
 // карточка для «Поделиться»

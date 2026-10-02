@@ -21,6 +21,7 @@ body {
 }
 #app { position: fixed; left: 0; top: 0; overflow: hidden; transform-origin: 0 0; background: #1b1e24; box-shadow: 0 0 60px rgba(0, 0, 0, .6); }
 #cv { position: absolute; left: 0; top: 0; display: block; z-index: 0; }
+#vig { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,.4) 100%); }
 .screen { position: absolute; inset: 0; display: none; overflow: hidden; z-index: 2; }
 .screen.active { display: flex; }
 .wrap { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: flex; flex-direction: column; overflow: hidden; }
@@ -233,7 +234,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .pedal img { display: block; pointer-events: none; }
 .pedal.gas img { width: 88px; height: 141px; }
 .pedal.brake img { width: 104px; height: 113px; }
-.pedal.on { transform: perspective(300px) rotateX(18deg) scaleY(.93); filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 255, 255, .4)); }
+.pedal.on { transform: perspective(300px) rotateX(18deg) scaleY(.93); filter: brightness(1.25); }
 .horn { width: 66px; height: 66px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px;
   background: radial-gradient(circle at 40% 35%, #ffe8a0, #ffcf2e 45%, #c89000); box-shadow: inset 0 0 0 3px #1b1e24, 0 5px 0 #0c0e12, 0 8px 14px rgba(0, 0, 0, .45); touch-action: none; }
 .horn .ico { width: 34px; height: 34px; }
