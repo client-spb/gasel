@@ -272,9 +272,9 @@ function drawTruckBody(px, py, a, opt) {
   ctx.drawImage(IMG.truck_body, ox, oy);
   // тюнинг
   if (opt.cos.includes('spoiler')) {
-    ctx.fillStyle = '#1a1b1e'; ctx.fillRect(TXp(-2.95), TYp(2.98), 0.06 * P, 0.3 * P); ctx.fillRect(TXp(-2.45), TYp(2.98), 0.06 * P, 0.3 * P);
+    ctx.fillStyle = '#1a1b1e'; ctx.fillRect(TXp(-4.15), TYp(2.98), 0.06 * P, 0.3 * P); ctx.fillRect(TXp(-3.65), TYp(2.98), 0.06 * P, 0.3 * P);
     const g = ctx.createLinearGradient(0, TYp(3.08), 0, TYp(2.92)); g.addColorStop(0, '#ff5a44'); g.addColorStop(1, '#8a120c');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(TXp(-3.2), TYp(3.1)); ctx.lineTo(TXp(-2.25), TYp(3.04)); ctx.lineTo(TXp(-2.25), TYp(2.95)); ctx.lineTo(TXp(-3.2), TYp(2.98)); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(TXp(-4.4), TYp(3.1)); ctx.lineTo(TXp(-3.45), TYp(3.04)); ctx.lineTo(TXp(-3.45), TYp(2.95)); ctx.lineTo(TXp(-4.4), TYp(2.98)); ctx.closePath(); ctx.fill();
   }
   if (opt.cos.includes('lights')) {
     ctx.fillStyle = '#16171a'; ctx.fillRect(TXp(0.66), TYp(2.40), 0.92 * P, 0.1 * P);
@@ -301,9 +301,9 @@ function drawTruckBody(px, py, a, opt) {
   if (opt.door > 0) {
     const ang = opt.door * Math.PI * 0.48, w = Math.sin(ang) * 0.9 * P, h = 1.72 * P;
     ctx.save(); ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(20,10,8,.85)'; ctx.fillRect(TXp(-3.05), TYp(2.66), 0.08 * P, h - 6);
-    if (IMG.door) ctx.drawImage(IMG.door, TXp(-3.05) - w, TYp(2.70), w, h);
-    ctx.fillStyle = 'rgba(0,0,0,' + (0.35 * Math.cos(ang)) + ')'; ctx.fillRect(TXp(-3.05) - w, TYp(2.70), w, h);
+    ctx.fillStyle = 'rgba(20,10,8,.85)'; ctx.fillRect(TXp(-4.25), TYp(2.66), 0.08 * P, h - 6);
+    if (IMG.door) ctx.drawImage(IMG.door, TXp(-4.25) - w, TYp(2.70), w, h);
+    ctx.fillStyle = 'rgba(0,0,0,' + (0.35 * Math.cos(ang)) + ')'; ctx.fillRect(TXp(-4.25) - w, TYp(2.70), w, h);
     ctx.restore();
   }
   // фары в сумерках
@@ -317,7 +317,7 @@ function drawTruckBody(px, py, a, opt) {
 function drawTruck(tr, T) {
   // тень
   const gx = tr.x, gy = T.heightAt(gx), hAbove = Math.max(0, tr.y - gy - 1);
-  const sw = (3.3 - Math.min(2, hAbove * 0.4)) * V.ppm;
+  const sw = (4.0 - Math.min(2.4, hAbove * 0.4)) * V.ppm;
   ctx.fillStyle = 'rgba(0,0,0,' + Math.max(0.08, 0.32 - hAbove * 0.05) + ')';
   ctx.beginPath(); ctx.ellipse(SX(gx), SY(gy) - 2, sw, 0.22 * V.ppm, -Math.atan(T.slopeAt(gx)), 0, Math.PI * 2); ctx.fill();
   const chrome = SAVE.cos.includes('chrome') && SAVE.cosOn.includes('chrome');
@@ -481,10 +481,10 @@ function drawMenuScene(dt) {
   MS.t += dt; MS.theme = menuTheme();
   const spd = 7;
   MS.x += spd * dt; MS.wang += spd / TRUCK.wheelR * dt;
-  const ppm = LAND ? Math.min(APPH / 6.2, APPW / 13) : Math.min(APPW / 7.4, APPH / 9.5);
+  const ppm = LAND ? Math.min(APPH / 6.2, APPW / 15.5) : Math.min(APPW / 8.6, APPH / 9.5);
   V.ppm = ppm; V.sx = 0; V.sy = 0;
   const roadSY = LAND ? APPH * 0.86 : APPH * 0.88;
-  const truckSX = LAND ? APPW * 0.27 : APPW * 0.5;
+  const truckSX = LAND ? APPW * 0.3 : APPW * 0.52;
   V.x = MS.x + (APPW / 2 - truckSX) / ppm; V.y = (roadSY - APPH / 2) / ppm;
   drawLayers(MS.theme, 1, MS.x * 1.6, 0);
   drawFlatRoad(MS.theme, 0);
@@ -494,7 +494,7 @@ function drawMenuScene(dt) {
   // машина
   const bob = Math.sin(MS.t * 9) * 0.015 + Math.sin(MS.t * 2.3) * 0.01;
   const tx = MS.x, ty = TRUCK.com[1] + bob;
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(SX(tx), SY(0) - 2, 3.2 * ppm, 0.2 * ppm, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(SX(tx - 0.1), SY(0) - 2, 3.9 * ppm, 0.2 * ppm, 0, 0, Math.PI * 2); ctx.fill();
   TRUCK.wheels.forEach(w => drawWheelAt(tx - TRUCK.com[0] + w.x, TRUCK.wheelR, MS.wang, SAVE.cosOn.includes('chrome')));
   drawTruckBody(SX(tx), SY(ty), Math.sin(MS.t * 1.7) * 0.004, { com: TRUCK.com, mood: Math.sin(MS.t * 0.5) > 0.6 ? 'happy' : 'norm', bob: Math.sin(MS.t * 9) * 1.5, cos: SAVE.cosOn, t: MS.t, door: 0, night: MS.theme === 'taiga' });
   // выхлоп
@@ -526,7 +526,7 @@ function drawGarageScene(dt) {
   // календарь и полка с шинами
   ctx.save(); ctx.translate(W * (LAND ? 0.06 : 0.08), H * (LAND ? 0.12 : 0.05));
   ctx.fillStyle = '#f2ece0'; ctx.fillRect(0, 0, 70, 90); ctx.fillStyle = '#d8231a'; ctx.fillRect(0, 0, 70, 40);
-  if (IMG.truck_body) ctx.drawImage(IMG.truck_body, 4, 8, 62, 30);
+  if (IMG.truck_body) ctx.drawImage(IMG.truck_body, 4, 12, 62, 25);
   ctx.fillStyle = '#333'; ctx.font = '11px ' + FONT_N; ctx.textAlign = 'center'; ctx.fillText('2026', 35, 54);
   ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(6, 62 + i * 7); ctx.lineTo(64, 62 + i * 7); ctx.stroke(); }
   ctx.restore();
@@ -542,9 +542,9 @@ function drawGarageScene(dt) {
   ctx.fillStyle = lg; ctx.beginPath(); ctx.moveTo(lx - 20, 40); ctx.lineTo(lx + 20, 40); ctx.lineTo(lx + W * 0.45, floorY + 40); ctx.lineTo(lx - W * 0.45, floorY + 40); ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#fff8d0'; ctx.beginPath(); ctx.arc(lx, 42, 6, 0, Math.PI * 2); ctx.fill();
   // Газель
-  const ppm = LAND ? Math.min(H / 5.2, W * 0.55 / 6.6) : Math.min(W / 7, H * 0.34 / 3.3);
+  const ppm = LAND ? Math.min(H / 5.2, W * 0.55 / 7.9) : Math.min(W / 8.3, H * 0.34 / 3.3);
   V.ppm = ppm; V.sx = 0; V.sy = 0; V.x = 0; V.y = 0;
-  const cx = lx, cy = floorY + 0.06 * ppm;
+  const cx = lx + 0.68 * ppm, cy = floorY + 0.06 * ppm;
   const toS = (lx2, ly2) => [cx + lx2 * ppm, cy - ly2 * ppm];
   TRUCK.wheels.forEach(w => { const [wx, wy] = toS(w.x, TRUCK.wheelR); const s = TRUCK.wheelR * 2 * ppm * 256 / 250; const img = SAVE.cosOn.includes('chrome') ? IMG.wheel_chrome : IMG.wheel; if (img) { ctx.save(); ctx.translate(wx, wy); ctx.rotate(GS.t * 0.3); ctx.drawImage(img, -s / 2, -s / 2, s, s); ctx.restore(); } });
   const [bx, by] = toS(TRUCK.com[0], TRUCK.com[1] + Math.sin(GS.t * 2) * 0.004);
@@ -558,7 +558,7 @@ function makeShareCard(title, line2) {
     const gr = g.createLinearGradient(0, 0, 0, 450); gr.addColorStop(0, '#3d8fe0'); gr.addColorStop(1, '#dff0ff'); g.fillStyle = gr; g.fillRect(0, 0, 800, 450);
     if (IMG.bg_summer_far) g.drawImage(IMG.bg_summer_far, 0, 0, 1200, 450);
     g.fillStyle = '#3a3c40'; g.fillRect(0, 380, 800, 70);
-    if (IMG.truck_body) g.drawImage(IMG.truck_body, 330, 180, 440, 214);
+    if (IMG.truck_body) g.drawImage(IMG.truck_body, 300, 200, 480, 197);
     if (IMG.logo) g.drawImage(IMG.logo, 10, 10, 360, 170);
     g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(20, 300, 420, 70);
     g.fillStyle = '#ffd23a'; g.font = '30px ' + FONT; g.fillText(title, 34, 336);

@@ -203,7 +203,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .dj.show { opacity: 1; }
 .dj b { font-family: var(--font); font-weight: 400; font-size: 13px; color: var(--yellow); }
 .radio .ico { width: 30px; height: 30px; }
-#app.land .dj { top: 64px; }
+#app.land .dj { top: 128px; }
 .timers { position: absolute; left: 10px; top: 100px; display: flex; flex-direction: column; gap: 6px; }
 .tm { display: none; align-items: center; gap: 6px; padding: 3px 8px 3px 3px; border-radius: 16px; background: rgba(14, 16, 20, .72); }
 .tm.show { display: flex; }

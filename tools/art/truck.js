@@ -1,14 +1,14 @@
 // Красная Газель с красной будкой: кузов, салон, колёса, двери, Серёга
 'use strict';
-const TK = { P: 160, M: 24, X0: -3.12, X1: 2.95, Y1: 2.80 };
+const TK = { P: 160, M: 24, X0: -4.32, X1: 2.95, Y1: 2.80 };
 TK.W = Math.round((TK.X1 - TK.X0) * TK.P + TK.M * 2);
 TK.H = Math.round(TK.Y1 * TK.P + TK.M * 2);
 TK.ax = TK.M - TK.X0 * TK.P; TK.ay = TK.M + TK.Y1 * TK.P;   // пиксель точки (0,0) — земля под началом координат
 const tx = x => TK.ax + x * TK.P, ty = y => TK.ay - y * TK.P, tp = (x, y) => [tx(x), ty(y)];
 const GEO = {
-  wheelR: 0.37, rearX: -1.25, frontX: 1.65, wheelY: 0.37,
-  boxX0: -3.05, boxX1: 0.40, boxY0: 0.98, boxY1: 2.70,
-  head: [1.18, 1.80], exhaust: [-0.48, 0.46], hingeX: -3.05
+  wheelR: 0.37, rearX: -1.85, frontX: 1.65, wheelY: 0.37,
+  boxX0: -4.25, boxX1: 0.40, boxY0: 0.98, boxY1: 2.70,
+  head: [1.18, 1.80], exhaust: [-0.48, 0.46], hingeX: -4.25
 };
 const RED = '#d8231a', RED_L = '#ff5a44', RED_D = '#8a120c';
 
@@ -53,14 +53,14 @@ function drawTruckBody(ctx, opt) {
   const P = TK.P;
   // ---------- рама ----------
   ctx.fillStyle = lg(ctx, 0, ty(0.95), 0, ty(0.70), [[0, '#3a3d42'], [0.5, '#22252a'], [1, '#121418']]);
-  rrect(ctx, tx(-2.95), ty(0.95), (2.45 + 2.95) * P, 0.25 * P, 6); ctx.fill();
-  for (let x = -2.8; x < 0.3; x += 0.62) { ctx.fillStyle = '#16181c'; ctx.fillRect(tx(x), ty(1.0), 0.14 * P, 0.08 * P); }
+  rrect(ctx, tx(-4.15), ty(0.95), (2.45 + 4.15) * P, 0.25 * P, 6); ctx.fill();
+  for (let x = -4.0; x < 0.3; x += 0.62) { ctx.fillStyle = '#16181c'; ctx.fillRect(tx(x), ty(1.0), 0.14 * P, 0.08 * P); }
   // заднее противоподкатное — полосатое
-  ctx.fillStyle = '#2a2d31'; ctx.fillRect(tx(-2.92), ty(0.92), 0.06 * P, 0.42 * P); ctx.fillRect(tx(-2.62), ty(0.92), 0.06 * P, 0.42 * P);
-  ctx.save(); rrect(ctx, tx(-3.14), ty(0.58), 0.62 * P, 0.16 * P, 5); ctx.clip();
-  for (let i = 0; i < 8; i++) { ctx.fillStyle = i % 2 ? '#f4f4f0' : '#e0261b'; poly(ctx, [[tx(-3.2 + i * 0.12), ty(0.42)], [tx(-3.2 + i * 0.12 + 0.12), ty(0.42)], [tx(-3.2 + i * 0.12 + 0.24), ty(0.6)], [tx(-3.2 + i * 0.12 + 0.12), ty(0.6)]]); ctx.fill(); }
+  ctx.fillStyle = '#2a2d31'; ctx.fillRect(tx(-4.12), ty(0.92), 0.06 * P, 0.42 * P); ctx.fillRect(tx(-3.82), ty(0.92), 0.06 * P, 0.42 * P);
+  ctx.save(); rrect(ctx, tx(-4.34), ty(0.58), 0.62 * P, 0.16 * P, 5); ctx.clip();
+  for (let i = 0; i < 8; i++) { ctx.fillStyle = i % 2 ? '#f4f4f0' : '#e0261b'; poly(ctx, [[tx(-4.4 + i * 0.12), ty(0.42)], [tx(-4.4 + i * 0.12 + 0.12), ty(0.42)], [tx(-4.4 + i * 0.12 + 0.24), ty(0.6)], [tx(-4.4 + i * 0.12 + 0.12), ty(0.6)]]); ctx.fill(); }
   ctx.fillStyle = lg(ctx, 0, ty(0.58), 0, ty(0.42), [[0, 'rgba(255,255,255,.35)'], [0.5, 'rgba(255,255,255,0)'], [1, 'rgba(0,0,0,.35)']]);
-  ctx.fillRect(tx(-3.2), ty(0.6), P, 0.2 * P); ctx.restore();
+  ctx.fillRect(tx(-4.4), ty(0.6), P, 0.2 * P); ctx.restore();
   // бензобак
   ctx.fillStyle = lg(ctx, 0, ty(0.86), 0, ty(0.48), [[0, '#4a4e55'], [0.35, '#2b2e33'], [1, '#101215']]);
   rrect(ctx, tx(-0.62), ty(0.86), 0.98 * P, 0.38 * P, 14); ctx.fill();
@@ -75,8 +75,8 @@ function drawTruckBody(ctx, opt) {
   ctx.fillStyle = '#111'; ellipse(ctx, tx(-0.42), ty(0.46), 0.02 * P, 0.04 * P); ctx.fill();
   // ящик ЗИП
   ctx.fillStyle = lg(ctx, 0, ty(0.9), 0, ty(0.6), [[0, '#3d4148'], [1, '#1b1d21']]);
-  rrect(ctx, tx(-2.45), ty(0.90), 0.55 * P, 0.30 * P, 4); ctx.fill();
-  ctx.fillStyle = '#8a8f96'; ctx.fillRect(tx(-2.22), ty(0.80), 0.1 * P, 0.03 * P);
+  rrect(ctx, tx(-3.3), ty(0.90), 0.55 * P, 0.30 * P, 4); ctx.fill();
+  ctx.fillStyle = '#8a8f96'; ctx.fillRect(tx(-3.07), ty(0.80), 0.1 * P, 0.03 * P);
 
   // ---------- задний подкрылок + брызговик ----------
   const R = GEO.rearX;
@@ -99,7 +99,7 @@ function drawTruckBody(ctx, opt) {
   ctx.fillStyle = lg(ctx, 0, by0, 0, by1, [[0, '#ff6a52'], [0.08, '#f2392a'], [0.45, RED], [0.85, '#b5170f'], [1, '#7d0f09']]);
   rrect(ctx, bx0 + 4, by0 + 4, bx1 - bx0 - 8, by1 - by0 - 8, 6); ctx.fill();
   // сэндвич-панели: вертикальные швы с заклёпками
-  const seams = [-2.18, -1.30, -0.42];
+  const seams = [-3.33, -2.39, -1.45, -0.51];
   seams.forEach(x => {
     ctx.fillStyle = 'rgba(80,6,3,.55)'; ctx.fillRect(tx(x) - 2, by0 + 8, 4, by1 - by0 - 16);
     ctx.fillStyle = 'rgba(255,140,120,.35)'; ctx.fillRect(tx(x) + 2, by0 + 8, 2, by1 - by0 - 16);
@@ -113,7 +113,7 @@ function drawTruckBody(ctx, opt) {
   ctx.fillStyle = lg(ctx, 0, by0, 0, by0 + 0.5 * P, [[0, 'rgba(255,255,255,.35)'], [1, 'rgba(255,255,255,0)']]);
   ctx.fillRect(bx0, by0, bx1 - bx0, 0.5 * P);
   ctx.globalAlpha = 0.12; ctx.fillStyle = '#fff';
-  poly(ctx, [[tx(-2.6), by0], [tx(-2.1), by0], [tx(-2.9), by1], [tx(-3.4), by1]]); ctx.fill();
+  poly(ctx, [[tx(-3.4), by0], [tx(-2.9), by0], [tx(-3.7), by1], [tx(-4.2), by1]]); ctx.fill();
   poly(ctx, [[tx(-1.75), by0], [tx(-1.62), by0], [tx(-2.42), by1], [tx(-2.55), by1]]); ctx.fill();
   ctx.globalAlpha = 1;
   // белая полоса + тёмная полоса снизу
@@ -139,23 +139,23 @@ function drawTruckBody(ctx, opt) {
     ctx.fillStyle = '#222'; ctx.fillRect(x - 3, y + 6, 6, 6);
   };
   lamp(tx(0.25), by0 - 6, '#ffb000', 'rgba(255,170,0,.8)');
-  lamp(tx(-2.92), by0 - 6, '#ff2a1a', 'rgba(255,30,10,.8)');
+  lamp(tx(-4.12), by0 - 6, '#ff2a1a', 'rgba(255,30,10,.8)');
   // боковые катафоты
-  for (let x = -2.7; x < 0.3; x += 0.9) { ctx.fillStyle = lg(ctx, 0, ty(1.06), 0, ty(0.99), [[0, '#ffd27a'], [1, '#e08a00']]); rrect(ctx, tx(x), ty(1.065), 18, 9, 3); ctx.fill(); }
+  for (let x = -3.9; x < 0.3; x += 0.9) { ctx.fillStyle = lg(ctx, 0, ty(1.06), 0, ty(0.99), [[0, '#ffd27a'], [1, '#e08a00']]); rrect(ctx, tx(x), ty(1.065), 18, 9, 3); ctx.fill(); }
   // задний фонарь
-  ctx.fillStyle = '#26272b'; rrect(ctx, tx(-3.14), ty(0.98), 0.24 * P, 0.15 * P, 4); ctx.fill();
-  withShadow(ctx, 'rgba(255,30,0,.9)', 10, 0, 0, () => { ctx.fillStyle = lg(ctx, 0, ty(0.96), 0, ty(0.86), [[0, '#ff6b5b'], [1, '#b10f05']]); rrect(ctx, tx(-3.12), ty(0.965), 0.10 * P, 0.11 * P, 3); ctx.fill(); });
-  ctx.fillStyle = '#ffae2b'; rrect(ctx, tx(-3.01), ty(0.965), 0.06 * P, 0.11 * P, 3); ctx.fill();
+  ctx.fillStyle = '#26272b'; rrect(ctx, tx(-4.34), ty(0.98), 0.24 * P, 0.15 * P, 4); ctx.fill();
+  withShadow(ctx, 'rgba(255,30,0,.9)', 10, 0, 0, () => { ctx.fillStyle = lg(ctx, 0, ty(0.96), 0, ty(0.86), [[0, '#ff6b5b'], [1, '#b10f05']]); rrect(ctx, tx(-4.32), ty(0.965), 0.10 * P, 0.11 * P, 3); ctx.fill(); });
+  ctx.fillStyle = '#ffae2b'; rrect(ctx, tx(-4.21), ty(0.965), 0.06 * P, 0.11 * P, 3); ctx.fill();
 
   // надписи на будке
   if (!opt.plain) {
     const cx = (bx0 + bx1) / 2;
     ctx.save();
-    ctx.font = (0.30 * P) + 'px ' + FONT_T; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = (0.36 * P) + 'px ' + FONT_T; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round'; ctx.strokeStyle = '#5a0905'; ctx.lineWidth = 12; ctx.strokeText('ГРУЗОПЕРЕВОЗКИ', cx, ty(2.30));
     ctx.fillStyle = lg(ctx, 0, ty(2.45), 0, ty(2.15), [[0, '#ffffff'], [0.55, '#fff4d6'], [1, '#ffd36a']]);
     ctx.fillText('ГРУЗОПЕРЕВОЗКИ', cx, ty(2.30));
-    ctx.font = (0.27 * P) + 'px ' + FONT_H; ctx.strokeStyle = '#5a0905'; ctx.lineWidth = 8;
+    ctx.font = (0.31 * P) + 'px ' + FONT_H; ctx.strokeStyle = '#5a0905'; ctx.lineWidth = 8;
     ctx.strokeText('Серёга. По всей России!', cx, ty(1.92)); ctx.fillStyle = '#fff'; ctx.fillText('Серёга. По всей России!', cx, ty(1.92));
     ctx.font = (0.15 * P) + 'px ' + FONT_N; ctx.lineWidth = 5;
     const ph = '8-900-ГАЗ-ЕЛЬ-0  •  недорого  •  аккуратно*';

@@ -200,7 +200,7 @@ function openDoors(n) {
   const tr = G.truck, cg = curCargo();
   say('lost', 'scared', true);
   for (let i = 0; i < n; i++) {
-    const [hx, hy] = tr.toWorld(-3.15, 1.4 + i * 0.4);
+    const [hx, hy] = tr.toWorld(-4.35, 1.4 + i * 0.4);
     const img = pick(cg.items);
     G.items.push({ img, x: hx, y: hy, vx: tr.vx * 0.4 - rnd(1.5, 4), vy: tr.vy * 0.5 + rnd(1.5, 4), rot: 0, vr: rnd(-6, 6), t: 0, life: 6, size: (cg.single ? cg.size * 0.8 : cg.size) * rnd(0.85, 1.1), mode: cg.eject, splat: cg.splat, sound: cg.sound, bounces: 0, frame: 0 });
     damageCargo(rnd(3, 5));
@@ -242,7 +242,7 @@ function truckLocal(x, y) {
 }
 function hitsTruck(x, y, pad) {
   const [lx, ly] = truckLocal(x, y);
-  return lx > -3.15 - pad && lx < 2.98 + pad && ly > 0.3 - pad && ly < 2.75 + pad;
+  return lx > -4.35 - pad && lx < 2.98 + pad && ly > 0.3 - pad && ly < 2.75 + pad;
 }
 function updateEntities(dt, tr) {
   const ents = G.T.ents, x0 = tr.x - 60, x1 = tr.x + 90;
