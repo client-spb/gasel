@@ -174,7 +174,7 @@ function onImpact(imp, tr) {
   if (!strong) return;
   G.dmgCd = 0.3; G.lastImpact = imp;
   setTimeout(() => { G.lastImpact = 0; }, 300);
-  G.cam.shake = Math.min(1.2, G.cam.shake + imp * 0.06);
+  if (imp > 4.5) G.cam.shake = Math.min(1, G.cam.shake + (imp - 4) * 0.06);
   if (imp > 4) { FX.land(imp); haptic(imp > 8 ? 'heavy' : 'medium'); } else FX.bump(imp);
   // облако пыли при приземлении
   const [gx] = tr.toWorld(0, 0), gy = G.T.heightAt(gx), col = surfColorDust(G.T.surfAt(gx), G.theme);
@@ -222,7 +222,7 @@ function emitDriving(dt, tr, ctl) {
   for (const w of tr.w) {
     if (!w.contact) continue;
     const slip = Math.abs(w.slip), col = surfColorDust(w.surf, G.theme);
-    const rate = (Math.abs(spd) > 3 ? 0.4 : 0) + slip * 0.5;
+    const rate = ((Math.abs(spd) > 3 ? 0.4 : 0) + slip * 0.5) * (lowFX() ? 0.4 : 1);
     if (Math.random() < rate * dt * 20) {
       const kind = w.surf === 2 ? 'mud' : w.surf === 3 || w.surf === 4 ? 'snowp' : 'dust';
       spawn({ kind, x: w.cx - 0.3, y: w.cy - TRUCK.wheelR + 0.05, vx: -Math.sign(w.spin || 1) * rnd(1, 3) - spd * 0.1, vy: rnd(0.5, kind === 'mud' ? 3.5 : 1.8), g: kind === 'dust' ? 0.2 : -9, life: rnd(0.5, 1), size: kind === 'dust' ? rnd(0.2, 0.45) : rnd(0.07, 0.14), grow: kind === 'dust' ? 1 : 0, col });
@@ -427,7 +427,8 @@ function updateCamera(dt) {
   c.x = lerp(c.x, tx, k); c.y = lerp(c.y, ty, 1 - Math.exp(-dt * 3.5));
   // держим машину в кадре по вертикали
   const top = c.y + H * 0.5 - 3.2, bot = c.y - H * 0.5 + 1.5;
-  if (tr.y > top) c.y += tr.y - top; if (tr.y < bot) c.y -= bot - tr.y;
+  const kk = 1 - Math.exp(-dt * 12);
+  if (tr.y > top) c.y += (tr.y - top) * kk; if (tr.y < bot) c.y -= (bot - tr.y) * kk;
   c.yAvg = lerp(c.yAvg, c.y, 1 - Math.exp(-dt * 0.35));
   c.shake = Math.max(0, c.shake - dt * 2.5);
   G.flash = Math.max(0, G.flash - dt * 1.5);

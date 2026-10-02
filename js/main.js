@@ -2,12 +2,15 @@
 //  ЗАПУСК: загрузка картинок, игровой цикл, кнопки, платформа
 // =====================================================================
 'use strict';
-let lastTs = 0, rafId = 0, running = false;
+let lastTs = 0, rafId = 0, running = false, sDt = 1 / 60;
 function frame(ts) {
   rafId = requestAnimationFrame(frame);
-  const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016);
+  const raw = Math.min(0.05, (ts - lastTs) / 1000 || 0.016);
   lastTs = ts;
-  autoQuality(dt);
+  // сглаживаем шаг времени: одиночный «долгий» кадр не дёргает картинку
+  sDt += (raw - sDt) * (Math.abs(raw - sDt) > 0.012 ? 0.35 : 0.15);
+  const dt = sDt;
+  autoQuality(raw);
   if (running && !G.paused && SCREEN === 'game') { try { update(dt); } catch (e) { console.error(e); } }
   try { draw(); } catch (e) { console.error(e); }
 }
@@ -15,12 +18,15 @@ function frame(ts) {
 const AQ = { acc: 0, n: 0, cool: 0 };
 function autoQuality(dt) {
   if (document.hidden) return;
-  AQ.acc += dt; AQ.n++;
+  AQ.n++; if (AQ.n <= 0) return; AQ.acc += dt;
   if (AQ.n < 90) return;
   const avg = AQ.acc / AQ.n; AQ.acc = 0; AQ.n = 0;
-  if (avg > 0.022 && QUALITY > 0.67) { QUALITY = Math.max(0.67, QUALITY - 0.17); resizeCanvas(); }
+  if (avg > 0.021) {
+    if (QUALITY > 0.67) { QUALITY = Math.max(0.67, QUALITY - 0.17); resizeCanvas(); }
+    else if (!AUTO_LOW && SAVE.gfx === 'auto') { AUTO_LOW = true; resizeCanvas(); }
+  }
 }
-function startLoop() { running = true; lastTs = performance.now(); }
+function startLoop() { running = true; lastTs = performance.now(); sDt = 1 / 60; AQ.acc = 0; AQ.n = -60; }
 function stopLoop() { running = false; }
 
 // ---------------- загрузка ----------------
@@ -84,6 +90,7 @@ on('st-close', () => closeOverlay('ov-settings'));
 on('st-sound', toggleSound, false);
 on('st-music', toggleMusic, false);
 on('st-privacy', openPrivacy);
+on('st-gfx', () => { SAVE.gfx = SAVE.gfx === 'auto' ? 'fast' : SAVE.gfx === 'fast' ? 'high' : 'auto'; AUTO_LOW = false; QUALITY = 1; persist(); updateSoundIcons(); resizeCanvas(); });
 on('st-howto', () => { closeOverlay('ov-settings'); openOverlay('ov-howto'); });
 on('how-close', () => { closeOverlay('ov-howto'); SAVE.tut = true; persistSoon(); });
 on('st-reset', () => confirmBox('Сбросить прогресс?', 'Деньги, рейсы, гараж и награды обнулятся. Газель снова станет стоковой.', 'Сбросить', () => {

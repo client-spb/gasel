@@ -41,9 +41,9 @@ class Terrain {
     const d = Math.sqrt(best);
     let nx = (px - bx) / (d || 1), ny = (py - by) / (d || 1);
     // точка ниже поверхности — нормаль берём от склона
-    if (py < this.heightAt(px)) { const s = this.slopeAt(px), l = Math.hypot(1, s); nx = -s / l; ny = 1 / l; return { d: -d, nx, ny }; }
+    if (py < this.heightAt(px)) { const s = this.slopeAt(px), l = Math.hypot(1, s); nx = -s / l; ny = 1 / l; const o = this._q || (this._q = {}); o.d = -d; o.nx = nx; o.ny = ny; return o; }
     if (d < 1e-6) { const s = this.slopeAt(px), l = Math.hypot(1, s); nx = -s / l; ny = 1 / l; }
-    return { d, nx, ny };
+    const o = this._q || (this._q = {}); o.d = d; o.nx = nx; o.ny = ny; return o;
   }
   // базовый рельеф
   base(x) {

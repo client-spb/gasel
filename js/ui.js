@@ -24,7 +24,7 @@ function updateSoundIcons() {
   setIcon($('b-music'), SAVE.music ? 'i-music' : 'i-nomusic'); $('b-music').classList.toggle('off', !SAVE.music);
   setIcon($('pz-sound'), SAVE.sound ? 'i-sound' : 'i-mute'); $('pz-sound').classList.toggle('off', !SAVE.sound);
   setIcon($('pz-music'), SAVE.music ? 'i-music' : 'i-nomusic'); $('pz-music').classList.toggle('off', !SAVE.music);
-  $('st-sound-v').textContent = SAVE.sound ? 'Вкл' : 'Выкл'; $('st-music-v').textContent = SAVE.music ? 'Вкл' : 'Выкл';
+  $('st-sound-v').textContent = SAVE.sound ? 'Вкл' : 'Выкл'; $('st-gfx-v').textContent = { auto: 'Авто', fast: 'Быстрая', high: 'Красивая' }[SAVE.gfx]; $('st-music-v').textContent = SAVE.music ? 'Вкл' : 'Выкл';
 }
 function toggleSound() { SAVE.sound = !SAVE.sound; persist(); updateSoundIcons(); if (SAVE.sound) FX.click(); if (!SAVE.sound) FX.engineSet(0, 0, 0, 0); }
 function toggleMusic() {

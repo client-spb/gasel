@@ -40,7 +40,7 @@ function metrika(fn, extra) { try { if (window.GameMetrika && window.GameMetrika
 const SAVE = {
   v: 1, money: 0, unlocked: 1, best: {}, stars: {}, up: { engine: 0, susp: 0, tires: 0, tank: 0, lock: 0 }, awd: false,
   horn: 'bip', horns: ['bip'], cos: [], cosOn: [], ach: {}, endlessBest: 0, sound: true, music: true, radio: 1,
-  daily: { last: '', streak: 0 }, tut: false,
+  daily: { last: '', streak: 0 }, tut: false, gfx: 'auto',
   st: { deliveries: 0, flips: 0, airMax: 0, shoo: 0, fines: 0, polite: 0, crashes: 0, km: 0, coins: 0, radios: [], cowhits: 0, earned: 0 }
 };
 function loadSave() {
@@ -64,6 +64,7 @@ function loadSave() {
     SAVE.radio = clamp(d.radio | 0, 0, RADIO.length - 1);
     if (d.daily && typeof d.daily === 'object') { SAVE.daily.last = String(d.daily.last || ''); SAVE.daily.streak = clamp(d.daily.streak | 0, 0, 999); }
     SAVE.tut = !!d.tut;
+    if (['auto', 'fast', 'high'].includes(d.gfx)) SAVE.gfx = d.gfx;
     if (d.st && typeof d.st === 'object') for (const k in SAVE.st) {
       if (k === 'radios') SAVE.st.radios = Array.isArray(d.st.radios) ? d.st.radios.filter(x => typeof x === 'string').slice(0, 10) : [];
       else SAVE.st[k] = Math.max(0, +d.st[k] || 0);

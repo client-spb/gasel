@@ -21,9 +21,10 @@ function layerImg(name, h) {
 }
 const V = { x: 0, y: 0, ppm: 30, sx: 0, sy: 0 };
 let glowSpr = null;
-let QUALITY = 1;   // снижается автоматически, если кадры не успевают
+let QUALITY = 1, AUTO_LOW = false;
+const lowFX = () => SAVE.gfx === 'fast' || (SAVE.gfx === 'auto' && AUTO_LOW);   // снижается автоматически, если кадры не успевают
 function resizeCanvas() {
-  DPR = Math.max(1, Math.min(1.5, window.devicePixelRatio || 1) * QUALITY);
+  DPR = lowFX() ? 1 : SAVE.gfx === 'high' ? Math.min(2, window.devicePixelRatio || 1) : Math.max(1, Math.min(1.5, window.devicePixelRatio || 1) * QUALITY);
   for (const k in layerCache) delete layerCache[k];
   cv.style.width = APPW + 'px'; cv.style.height = APPH + 'px';
   cv.width = Math.round(APPW * DPR); cv.height = Math.round(APPH * DPR);
@@ -73,14 +74,14 @@ function drawLayers(theme, alpha, camX, vy) {
   const fh = Math.max(H * 0.84, 240), far = layerImg('bg_' + theme + '_far', fh), fw = far ? far.width / DPR : 2048 * fh / 768;
   const fTop = H * 0.5 - 0.7 * fh + vy * 0.1;
   ctx.fillStyle = t.sky[0]; ctx.fillRect(0, 0, W, fTop + 2);
-  if (far) { let off = ((camX * ppm * 0.035) % fw + fw) % fw; for (let x = -off; x < W; x += fw) ctx.drawImage(far, Math.floor(x), Math.round(fTop), fw, fh); }
+  if (far) { let off = ((camX * ppm * 0.035) % fw + fw) % fw; for (let x = -off; x < W; x += fw) ctx.drawImage(far, x, fTop, fw + 0.5, fh); }
   else { const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, t.sky[0]); g.addColorStop(0.6, t.sky[1]); g.addColorStop(1, t.sky[2]); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
   ctx.fillStyle = t.ground; ctx.fillRect(0, fTop + fh - 1, W, H);
   const mh = Math.max(H * 0.42, 130), mid = layerImg('bg_' + theme + '_mid', mh), mw = mid ? mid.width / DPR : 1, mBot = H * 0.8 + vy * 0.25;
-  if (mid) { let off = ((camX * ppm * 0.14) % mw + mw) % mw; for (let x = -off; x < W; x += mw) ctx.drawImage(mid, Math.floor(x), Math.round(mBot - mh), mw, mh); }
+  if (mid) { let off = ((camX * ppm * 0.14) % mw + mw) % mw; for (let x = -off; x < W; x += mw) ctx.drawImage(mid, x, mBot - mh, mw + 0.5, mh); }
   ctx.fillStyle = t.mid; ctx.fillRect(0, mBot - 2, W, H);
   const nh = Math.max(H * 0.27, 90), near = layerImg('bg_' + theme + '_near', nh), nw = near ? near.width / DPR : 1, nBot = H * 0.94 + vy * 0.45;
-  if (near) { let off = ((camX * ppm * 0.32) % nw + nw) % nw; for (let x = -off; x < W; x += nw) ctx.drawImage(near, Math.floor(x), Math.round(nBot - nh), nw, nh); }
+  if (near) { let off = ((camX * ppm * 0.32) % nw + nw) % nw; for (let x = -off; x < W; x += nw) ctx.drawImage(near, x, nBot - nh, nw + 0.5, nh); }
   ctx.fillStyle = t.near; ctx.fillRect(0, nBot - 2, W, H);
   ctx.restore();
 }
@@ -121,7 +122,8 @@ function drawGround(T, theme) {
   const gimg = IMG[t.grass];
   if (gimg) {
     const w = 1.5 * ppm, h = w * 96 / 128;
-    for (let i = i0 - (i0 % 3); i <= i1; i += 3) {
+    const gstep = lowFX() ? 6 : 3;
+    for (let i = i0 - (i0 % gstep); i <= i1; i += gstep) {
       if (i < 0 || T.s[i] === 5) continue; const hh = (i * 2654435761 >>> 0) % 100; if (hh < 25) continue;
       const x = TX0 + i * DX + (hh % 7) * 0.1, v = hh % 4;
       ctx.drawImage(gimg, v * 128, 0, 128, 96, SX(x) - w / 2, SY(T.hv[i]) - h + 0.12 * ppm, w, h);
@@ -328,8 +330,9 @@ function drawTruck(tr, T) {
 }
 
 // ---------------- частицы ----------------
-function drawParticles(list) {
+function drawParticles(list, only) {
   for (const p of list) {
+    if (only === 1 && p.kind !== 'stain' || only === 2 && p.kind === 'stain') continue;
     const k = p.t / p.life, sx = SX(p.x), sy = SY(p.y), r = Math.max(0.5, p.size * V.ppm);
     switch (p.kind) {
       case 'dust': case 'smoke': {
@@ -375,7 +378,7 @@ function drawPopups() {
 const WX = { list: [], kind: null };
 function drawWeather(kind, dt, speed) {
   if (!kind) { WX.list.length = 0; WX.kind = null; return; }
-  if (WX.kind !== kind) { WX.kind = kind; WX.list = []; const n = kind === 'leaves' ? 26 : 130; for (let i = 0; i < n; i++) WX.list.push({ x: Math.random() * APPW, y: Math.random() * APPH, z: 0.4 + Math.random() * 0.8, r: Math.random() * 6.28 }); }
+  if (WX.kind !== kind || WX.low !== lowFX()) { WX.low = lowFX(); WX.kind = kind; WX.list = []; const n = kind === 'leaves' ? 26 : lowFX() ? 50 : 130; for (let i = 0; i < n; i++) WX.list.push({ x: Math.random() * APPW, y: Math.random() * APPH, z: 0.4 + Math.random() * 0.8, r: Math.random() * 6.28 }); }
   const drift = speed * V.ppm * 0.6;
   ctx.save();
   for (const p of WX.list) {
@@ -407,7 +410,7 @@ function draw() {
   if (!G.T || !G.truck) { ctx.fillStyle = '#222'; ctx.fillRect(0, 0, APPW, APPH); return; }
   const c = G.cam, T = G.T, tr = G.truck;
   const sh = c.shake * c.shake * 10;
-  V.x = c.x; V.y = c.y; V.ppm = c.ppm; V.sx = (Math.random() - 0.5) * sh; V.sy = (Math.random() - 0.5) * sh;
+  V.x = c.x; V.y = c.y; V.ppm = c.ppm; const st = performance.now() / 1000; V.sx = (Math.sin(st * 53) + Math.sin(st * 31) * 0.6) * sh * 0.4; V.sy = (Math.sin(st * 47 + 1) + Math.sin(st * 23) * 0.6) * sh * 0.4;
   const vy = clamp((c.yAvg - c.y) * c.ppm, -APPH * 0.3, APPH * 0.3);
   if (G.themePrev && G.themeMix < 1) drawLayers(G.themePrev, 1, c.x, vy);
   drawLayers(G.theme, G.themePrev && G.themeMix < 1 ? G.themeMix : 1, c.x, vy);
@@ -417,15 +420,15 @@ function draw() {
   drawBridgeRails(T);
   drawDecorFront(T);
   drawEntities(T, false);
-  drawParticles(G.particles.filter(p => p.kind === 'stain'));
+  drawParticles(G.particles, 1);
   drawTruck(tr, T);
   drawItems();
-  drawParticles(G.particles.filter(p => p.kind !== 'stain'));
+  drawParticles(G.particles, 2);
   // лось/корова, уходящие «к зрителю»
   for (const e of T.ents) if ((e.type === 'moose') && !e.dead && (e.depth || 0) < -0.05 && Math.abs(e.x - V.x) < 40) { const d = -e.depth; sprite('moose' + (e.frame || 0), e.x, T.heightAt(e.x) - d * 1.8, 1 + d * 0.6, 0, 1 - d); }
   // передняя трава
   const t = THEMES[G.theme], gimg = IMG[t.grass];
-  if (gimg) {
+  if (gimg && !lowFX()) {
     const x0 = V.x - APPW / 2 / V.ppm - 2, x1 = V.x + APPW / 2 / V.ppm + 2, w = 1.7 * V.ppm, h = w * 96 / 128;
     for (let x = Math.floor(x0 / 5.3) * 5.3; x < x1; x += 5.3) { const hh = Math.abs(Math.floor(x * 7.31)) % 4; if (T.surfAt(x) === 5) continue; ctx.drawImage(gimg, hh * 128, 0, 128, 96, SX(x) - w / 2, SY(T.heightAt(x) - 0.42) - h, w, h); }
   }

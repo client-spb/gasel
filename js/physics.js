@@ -31,8 +31,8 @@ class Truck {
   }
   // локальная точка кузова → мир
   toWorld(lx, ly) {
-    const c = Math.cos(this.a), s = Math.sin(this.a), dx = lx - TRUCK.com[0], dy = ly - TRUCK.com[1];
-    return [this.x + dx * c - dy * s, this.y + dx * s + dy * c];
+    const c = Math.cos(this.a), s = Math.sin(this.a), dx = lx - TRUCK.com[0], dy = ly - TRUCK.com[1], o = this._tw || (this._tw = [0, 0]);
+    o[0] = this.x + dx * c - dy * s; o[1] = this.y + dx * s + dy * c; return o;
   }
   get speed() { return this.vx * Math.cos(this.a) + this.vy * Math.sin(this.a); }
   step(dt, ctl, T) {
@@ -58,7 +58,7 @@ class Truck {
       } else brakeT = ctl.brake * TRUCK.brake * R * 0.5;
     }
     if (ctl.gas === 0 && ctl.brake === 0) brakeT = 260;   // торможение двигателем
-    const nDrive = this.w.filter(w => w.drive).length;
+    const nDrive = this.w[1].drive ? 2 : 1;
     this.impact = 0; this.scrape = 0;
     for (const w of this.w) {
       const [mx, my] = this.toWorld(w.lx, TRUCK.mountY);
